@@ -1,0 +1,44 @@
+fermat 1: prerušil som po 23 min, nič nenašiel
+
+2016-04-04:
+pollard p-1: 2418059292539721278076064468260051655561 po 4 minútach
+(pred minioptimalizáciou)
+
+pollard p-1: 460772560836792896387743680599 po 12 ms
+
+timeouty pri limite 10s:
+157185040413215530975165633061
+178617532837899776787217832941
+96368378329569366965481375161
+41702562059995270288416739123
+234425024443044792063543979349
+147325628837781527224761907889
+89981271475268439210802711349
+216948066429127138241721468529
+118962322543851674548159048321
+
+# tie isté timeouty aj pri limite 20s, 30s
+
+
+MOŽNÁ OPTIMALIZÁCIA:
+nenásobiť vždy k, ale to robiť po kúskoch? (napr. násobiť vždy keď bude k delitelné 100) -> otestovať, či to je fakt optimalizácia
+
+ALEBO: pochopiť jak to funguje a implementovať to podľa toho
+
+# timeouty pri 600s:
+Found using Pollard p-1
+0x29bb3920ef5e958b9
+287.66user 0.86system 4:48.62elapsed 99%CPU (0avgtext+0avgdata 1360maxresident)k
+0inputs+0outputs (0major+401minor)pagefaults 0swaps
+Timeout at 178617532837899776787217832941 # CPU time limit exceeded - 30m
+Timeout at 96368378329569366965481375161  # CPU time limit exceeded - 30m
+Timeout at 41702562059995270288416739123  # CPU time limit exceeded - 30m
+Timeout at 234425024443044792063543979349 # CPU time limit exceeded - 30m
+Timeout at 147325628837781527224761907889
+Timeout at 89981271475268439210802711349
+Timeout at 216948066429127138241721468529
+Found using Pollard p-1
+0x1f9561b2e71a7fa85
+167.32user 0.50system 2:47.85elapsed 99%CPU (0avgtext+0avgdata 1364maxresident)k
+0inputs+0outputs (0major+402minor)pagefaults 0swaps
+
