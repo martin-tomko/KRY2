@@ -1,5 +1,5 @@
 NAME=kry
-MODULES=$(NAME) factor gmp_helper sieve
+MODULES=$(NAME) factor gmp_helper sieve elliptic_curves
 OBJS=$(addsuffix .o, $(MODULES))
 CC=g++
 CFLAGS=-pedantic -Wall -W -g -std=c++0x -pthread

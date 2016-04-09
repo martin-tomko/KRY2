@@ -4,6 +4,10 @@
 #include "factor.h"
 #include "kry.h"
 #include <iostream>
+#include <cmath>
+//#include "sieve.h"
+
+#include "elliptic_curves.h"
 
 void factor(mpz_t& P, mpz_t& N) {
   /* Find a prime factor of N: */
@@ -15,6 +19,12 @@ void factor(mpz_t& P, mpz_t& N) {
   // Attempt to find a factor using trial division:
   if (trial_division(P, N)) { 
     std::cerr << "Found using Trial division" << std::endl;
+    return;
+  }
+
+  // Attempt to find a factor using Pollard p-1 factorization:
+  if (lenstra_ec_factorization(P, N)) {
+    std::cerr << "Found using Lenstra EC factorization" << std::endl;
     return;
   }
 
@@ -146,6 +156,70 @@ bool pollard_rho_factorization(mpz_t& P, mpz_t& N) {
 }
 
 bool pollard_p_1_factorization(mpz_t& P, mpz_t& N) {
+
+  /*
+  Randomizer rnd;
+  size_t bound1 = 10000000; // = 10000000;
+//       bound2 = bound1 * bound1;
+  const bool_vec& is_prime = Sieve::get_vector(bound1);
+
+  size_t pexp;
+//  double logb;
+  GMPNum gmp[2];
+  mpz_t &m = gmp[0],
+        &a = gmp[1];
+
+  // choose a:
+  mpz_sub_ui(P, N, 2);     // P = N-2
+  mpz_urandomm(a, rnd, P); // 0 <= fct < N-2
+  mpz_add_ui(a, a, 2);     // 2 <= fct < N
+
+  while (true) {
+    Sieve::stretch(bound1);
+
+    // Compute m = lcm(1, ..., bound1):
+    mpz_set_ui(m, 1);
+    for (size_t p = 2; p < bound1; p++) { // for each prime:
+      if (!is_prime[p]) { // skip composite numbers
+        continue;
+      }
+
+      pexp = p;
+      while (p < bound1) {
+        pexp *= p;
+      }
+      pexp /= p;
+
+      mpz_mul_ui(m, m, pexp);
+    }
+
+    
+
+
+    gcd(P, a, N);
+    if (mpz_cmp_ui(P, 1) != 0) { // if gcd(a,n) != 1, we found a factor.
+      return true;
+    }
+
+    mpz_powm(a, a, m, N); // a = a^m mod N
+    mpz_sub_ui(a, a, 1);  // a = a - 1
+    gcd(P, a, N);
+
+    if (mpz_cmp_ui(P, 1) == 0) { // gcd == 1, increase bound and continue
+      bound1 *= 2;
+    } else if (mpz_cmp(P, N) == 0) { // gcd == N, change a
+      // choose a:
+      mpz_sub_ui(P, N, 2);     // P = N-2
+      mpz_urandomm(a, rnd, P); // 0 <= fct < N-2
+      mpz_add_ui(a, a, 2);     // 2 <= fct < N
+    } else { // otherwise, a factor has been found.
+      return true;
+    }
+
+  }
+  */
+
+//  /*
   Randomizer rnd;
 
   GMPNum gmp[2];
@@ -159,9 +233,12 @@ bool pollard_p_1_factorization(mpz_t& P, mpz_t& N) {
     mpz_set_ui(k, 2);
 
     // choose A:
+/*
     mpz_sub_ui(P, N, 2);     // P = N-2
     mpz_urandomm(fct, rnd, P);    // 0 <= fct < N-2
     mpz_add_ui(fct, fct, 2); // 2 <= fct < N
+*/
+    rnd.get_random(fct, 2, N);
     mpz_set(P, fct);
 
     while(mpz_cmp(P, N) != 0) {
@@ -176,25 +253,113 @@ bool pollard_p_1_factorization(mpz_t& P, mpz_t& N) {
   }
 
   return false;
+//  */
 }
 
-void gcd(mpz_t& R, mpz_t& M, mpz_t& N) {
-  /* GCD using Euclid's algorithm */
+bool lenstra_ec_factorization(mpz_t& P, mpz_t& N) {
+  /* It is assumed that N was already analyzed with a simpler method
+   * and is not divisible by 2 or 3. */
 
-  static GMPNum gmp[2];
-  static mpz_t &A = gmp[0],
-               &B = gmp[1];
+  // 1. TODO: check whether m^r = n for some r?
+  unsigned long K = 1000000;
+  unsigned attempts = 0;
 
-  // Create copies of M and N, so as not to overwrite them:
-  mpz_set(A, M);
-  mpz_set(B, N);
+  GMPNum gmp[1];
+  mpz_t &k = gmp[0];
+  lcm_cum(k, K, N);
+  mpz_mod(k, k, N);
 
-  // Compute:
-  while (mpz_cmp_ui(B, 0) != 0) {
-    mpz_set(R, B);
-    mpz_mod(B, A, B);
-    mpz_set(A, R);
+  std::cout << "Lenstra is happening." << std::endl;
+  while (true) {
+    ECPoint E;
+    // Pick curve:
+    if (!pick_curve(E, P, N)) {
+      std::cout << "We are done, somehow" << std::endl;
+
+      // A factor was found and written to P.
+      return true;
+    }
+
+  
+    // Print point:
+    std::cout << "Observe the point:" <<  std::endl;
+    print_hex_mpz(E.get_x());
+    std::cout << std::endl;
+    print_hex_mpz(E.get_y());
+    std::cout << std::endl;
+    print_hex_mpz(E.get_a());
+    std::cout << std::endl;
+
+
+    if (! E.pow(P, k)) { // Addition failed.
+      if (mpz_cmp(P, N) == 0) {
+        K /= 2;
+        break;
+      } else { // A factor was found:
+        return true;
+      }
+    }
+
+    if (E.is_inf()) {
+      continue;
+    }
+
+    attempts++;
+    if ((attempts & 255) == 255) {
+      std::cerr << "Increasing K from " << K << std::endl;
+      K *= 2;
+      lcm_cum(k, K, N);
+      mpz_mod(k, k, N);
+    }
   }
 
-  // If the loop finished, R contains gcd(A, B); no further assignment needed.
+  return false;
+}
+
+bool pick_curve(ECPoint& E, mpz_t& remainder, mpz_t& N) {
+  static Randomizer rnd;
+
+  GMPNum gmp[3];
+  mpz_t &x = gmp[0],
+        &y = gmp[1],
+        &a = gmp[2];
+
+  while(true) {
+    rnd.get_random(x, 2, N);
+    rnd.get_random(y, 2, N);
+    rnd.get_random(a, 2, N);
+
+    E.generate(a, x, y, N);
+    if (E.nonsingular(remainder)) { // E is nonsingular, return.
+      return true;
+    }
+
+    if (mpz_cmp(remainder, N) != 0) { // A factor was found.
+      return false;
+    }
+
+    // Otherwise, we must try again.
+  }
+}
+
+void lcm_cum(mpz_t& lcm, unsigned long K, mpz_t& N) {
+  Sieve& is_prime = Sieve::get_instance(K);
+
+  unsigned m;
+
+  mpz_set_ui(lcm, 1);
+  for (unsigned p = 2; p < K; p++) {
+    if (is_prime[p]) {
+      m = p;
+      while (m < K) {
+        m *= p;
+      }
+  //    m /= p;
+
+      mpz_mul_ui(lcm, lcm, m);
+      if ((p & 255) == 255) {
+        mpz_mod(lcm, lcm, N);
+      }
+    }
+  }
 }

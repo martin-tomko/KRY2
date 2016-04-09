@@ -10,7 +10,8 @@
 
 #include "factor.h"
 
-#include "sieve.h"
+//#include "sieve.h"
+#include "elliptic_curves.h"
 
 using namespace std;
 
@@ -24,6 +25,8 @@ const char* HELP_MSG =
 const char* MODE_NAME[] = {
   "generate", "encrypt", "decrypt", "factor", "help"
 };
+
+void test_invert();
 
 int main(int argc, char** argv) {
   Params par;
@@ -148,5 +151,47 @@ void print_params(Params& par) {
     cerr << "val[" << i << "] = ";
     mpz_out_str(stderr, 10, par.val[i]);
     cerr << endl;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+// random test functions
+
+void test_invert() {
+  GMPNum gmp[3];
+  mpz_t &a = gmp[0], &b = gmp[1], &n = gmp[2];
+
+/*
+  mpz_set_ui(a, 29);
+  mpz_set_ui(n, 89);
+  invert(b, a, n);
+
+  print_dec_mpz(b);
+  cout << endl;
+  return;
+ */
+
+//  unsigned long N = 179424673;
+//  unsigned long N = 15485863;
+  unsigned long N = 1299709;
+  mpz_set_ui(n, N);
+  for(unsigned long i = 1; i < N; i++) {
+    mpz_set_ui(a, i);
+    if (!invert(b, a, n)) {
+      cerr << "Problems at " << i << endl;
+    }
+    mpz_mul(b, a, b);
+    mpz_mod(b, b, n);
+    if (mpz_cmp_ui(b, 1) != 0) {
+      cerr << "invert failed at " << i << endl;
+    }
   }
 }

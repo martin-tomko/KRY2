@@ -22,12 +22,10 @@ class Sieve {
   static Sieve& get_instance(size_t min_size)
     { Sieve& s = get_instance(); s.resize(min_size); return s; }
 
-  static std::vector<bool>& get_vector()
-    { return get_instance().prime; }
+  static void stretch(size_t min_size)
+    { get_instance().resize(min_size); }
 
-  static std::vector<bool>& get_vector(size_t min_size)
-    { return get_instance(min_size).prime; }
-
+  bool operator[](size_t index) { return prime[index]; }
  private:
   Sieve() = delete;
   Sieve(size_t s) : prime (s, true), size {s}, first_uncomputed {0}

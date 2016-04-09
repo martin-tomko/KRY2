@@ -25,9 +25,14 @@ class Randomizer {
   ~Randomizer() { gmp_randclear(state); }
   void seed();
   operator gmp_randstate_t&() { return state; }
+
+  void get_random(mpz_t&, unsigned long, mpz_t&);
  private:
   gmp_randstate_t state;
   
 };
+
+void gcd(mpz_t&, mpz_t&, mpz_t&);
+bool invert(mpz_t&, mpz_t&, mpz_t&);
 
 #endif
