@@ -23,5 +23,6 @@ bool lenstra_ec_factorization(mpz_t&, mpz_t&);
 bool pick_curve(ECPoint&, mpz_t&, mpz_t&);
   // Cummulative least common multiple - of integers up to K
 void lcm_cum(mpz_t&, unsigned long, mpz_t&);
+bool is_m_to_r(mpz_t&, mpz_t&, mpz_t&);
 
 #endif

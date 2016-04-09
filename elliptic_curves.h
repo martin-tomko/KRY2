@@ -6,6 +6,9 @@
 
 #include "gmp_helper.h"
 
+// TODO: point "at infinity"! not "infinite" point
+//       (but the rest are "finite" points
+
 class ECPoint {
  public:
   ECPoint(bool is_inf) : valid {is_inf}, inf {is_inf} {}

@@ -270,17 +270,17 @@ bool lenstra_ec_factorization(mpz_t& P, mpz_t& N) {
   mpz_set_ui(k, TRIAL_LIMIT);
   if (is_m_to_r(P, N, k)) {
     return true;
-  }
+  }
 
   lcm_cum(k, K, N);
   mpz_mod(k, k, N);
 
-  //std::cout << "Lenstra is happening." << std::endl;
+  std::cout << "Lenstra is happening." << std::endl;
   while (true) {
     ECPoint E;
     // Pick curve:
     if (!pick_curve(E, P, N)) {
-    //  std::cout << "We are done, somehow" << std::endl;
+      std::cout << "We are done, somehow" << std::endl;
 
       // A factor was found and written to P.
       return true;
@@ -362,7 +362,7 @@ void lcm_cum(mpz_t& lcm, unsigned long K, mpz_t& N) {
       while (m < K) {
         m *= p;
       }
-      m /= p;
+  //    m /= p;
 
       mpz_mul_ui(lcm, lcm, m);
       if ((p & 255) == 255) {
@@ -378,16 +378,12 @@ bool is_m_to_r(mpz_t& m, mpz_t& n, mpz_t& limit) {
   GMPNum gmp;
   mpz_t& mr = gmp;
 
-  /* GMP has a function for this, which is however not very useful, as it
-   * doesn't provide the root:
-   *
-   *   return mpz_perfect_power_p(n);
-   * */
+  return mpz_perfect_power_p(n);
 
   unsigned long r = 2;
   mpz_root(m, n, r);
   while (mpz_cmp(m, limit) >= 0) {  // while m >= limit:
-    mpz_pow_ui(mr, m, r);           // mr = m^r
+    mpz_pow_ui(mr, m, r)            // mr = m^r
     if (mpz_cmp(mr, n) == 0) {      // mr == n  -->  n == m^r:
       return true;
     }
