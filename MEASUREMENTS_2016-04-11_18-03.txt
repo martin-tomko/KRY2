@@ -1,0 +1,199 @@
+Found using Brent
+12.56
+Found using Brent
+6.65
+Found using Brent
+6.47
+Found using Brent
+1.60
+Found using Brent
+6.60
+Found using Brent
+6.53
+Found using Brent
+6.63
+Found using Brent
+6.58
+Found using Brent
+3.46
+Found using Brent
+6.62
+Found using Brent
+1.72
+Found using Brent
+18.32
+Found using Brent
+3.37
+Found using Brent
+13.14
+Found using Brent
+3.34
+Found using Brent
+13.26
+Found using Brent
+6.65
+Found using Brent
+13.35
+Found using Brent
+6.69
+Found using Brent
+3.32
+Found using Brent
+6.60
+Found using Brent
+1.68
+Found using Brent
+6.48
+Found using Brent
+7.68
+Found using Brent
+3.30
+Found using Brent
+1.65
+Found using Brent
+13.27
+Found using Brent
+8.43
+Found using Brent
+6.99
+Found using Brent
+0.82
+Found using Brent
+6.65
+Found using Brent
+28.14
+Found using Brent
+3.25
+Found using Brent
+6.76
+Found using Brent
+6.72
+Found using Brent
+3.42
+Found using Brent
+6.68
+Found using Brent
+13.17
+Found using Brent
+20.50
+Found using Brent
+6.94
+Found using Brent
+13.44
+Found using Brent
+13.44
+Found using Brent
+7.31
+Found using Brent
+20.49
+Found using Brent
+0.82
+Found using Brent
+6.82
+Found using Brent
+3.36
+Found using Brent
+6.80
+Found using Brent
+6.69
+Found using Brent
+24.05
+Found using Brent
+6.79
+Found using Brent
+6.52
+Found using Brent
+3.38
+Found using Brent
+6.77
+Found using Brent
+6.16
+Found using Brent
+13.10
+Found using Brent
+6.61
+Found using Brent
+3.26
+Found using Brent
+3.23
+Found using Brent
+6.59
+Found using Brent
+3.38
+Found using Brent
+13.16
+Found using Brent
+23.50
+Found using Brent
+3.58
+Found using Brent
+6.79
+Found using Brent
+20.98
+Found using Brent
+6.57
+Found using Brent
+19.57
+Found using Brent
+14.19
+Found using Brent
+1.73
+Found using Brent
+22.91
+Found using Brent
+3.36
+Found using Brent
+14.64
+Found using Brent
+24.44
+Timeout at 0x1fc6cbb50bdd8aa6352d4aab9
+Found using Brent
+13.33
+Found using Brent
+6.53
+Found using Brent
+3.18
+Found using Brent
+19.67
+Found using Brent
+1.63
+Found using Brent
+6.73
+Found using Brent
+6.67
+Found using Brent
+6.69
+Found using Brent
+3.27
+Found using Brent
+3.35
+Found using Brent
+6.91
+Found using Brent
+14.65
+Found using Brent
+13.26
+Found using Brent
+6.84
+Found using Brent
+13.31
+Found using Brent
+6.57
+Found using Brent
+6.96
+Found using Brent
+3.29
+Found using Brent
+6.47
+Found using Brent
+6.63
+Found using Brent
+12.56
+Found using Brent
+6.56
+Found using Brent
+1.74
+Found using Brent
+0.81
+Found using Brent
+15.46

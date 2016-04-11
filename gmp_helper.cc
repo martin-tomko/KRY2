@@ -17,7 +17,7 @@ void Randomizer::seed() {
   
   std::ifstream rnd_stream;
   try {
-    rnd_stream.open("/dev/random", std::ios::in | std::ios::binary);
+    rnd_stream.open("/dev/urandom", std::ios::in | std::ios::binary);
     rnd_stream.read(reinterpret_cast<char*>(&seed), sizeof(seed));
     rnd_stream.close();
   } catch (...) {
@@ -35,12 +35,11 @@ void Randomizer::get_random(mpz_t& n, unsigned long min_val, mpz_t& max_val) {
   mpz_add_ui(n, n, min_val);
 }
 
-void gcd(mpz_t& R, mpz_t& M, mpz_t& N) {
+void gcd(mpz_t& A, mpz_t& M, mpz_t& N) {
   /* GCD using Euclid's algorithm */
 
-  static GMPNum gmp[2];
-  static mpz_t &A = gmp[0],
-               &B = gmp[1];
+  static GMPNum gmp[1];
+  static mpz_t &B = gmp[0];
 
   // Create copies of M and N, so as not to overwrite them:
   mpz_set(A, M);
@@ -48,12 +47,11 @@ void gcd(mpz_t& R, mpz_t& M, mpz_t& N) {
 
   // Compute:
   while (mpz_cmp_ui(B, 0) != 0) {
-    mpz_set(R, B);
-    mpz_mod(B, A, B);
-    mpz_set(A, R);
+    mpz_swap(A, B);
+    mpz_mod(B, B, A);
   }
 
-  // If the loop finished, R contains gcd(A, B); no further assignment needed.
+  // A now contains gcd(A, B)
 }
 
 bool invert(mpz_t& result, mpz_t& a, mpz_t& n) {

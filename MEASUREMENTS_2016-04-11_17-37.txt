@@ -1,0 +1,197 @@
+Found using Brent
+8.63
+Found using Brent
+0.80
+Found using Brent
+3.29
+Found using Brent
+3.27
+Found using Brent
+12.28
+Found using Brent
+18.84
+Found using Brent
+3.31
+Found using Brent
+3.24
+Found using Brent
+1.87
+Found using Brent
+6.88
+Timeout at 106260519843901950107490255727
+Found using Brent
+3.27
+Found using Brent
+3.34
+Found using Brent
+12.99
+Found using Brent
+0.80
+Found using Brent
+3.27
+Found using Brent
+15.69
+Found using Brent
+6.38
+Found using Brent
+1.62
+Found using Brent
+1.64
+Found using Brent
+0.49
+Found using Brent
+3.38
+Found using Brent
+6.03
+Found using Brent
+3.29
+Found using Brent
+3.25
+Found using Brent
+3.28
+Found using Brent
+6.64
+Found using Brent
+3.55
+Found using Brent
+6.71
+Found using Brent
+6.99
+Found using Brent
+6.85
+Found using Brent
+20.20
+Found using Brent
+13.73
+Found using Brent
+6.94
+Found using Brent
+3.40
+Found using Brent
+3.62
+Found using Brent
+6.92
+Found using Brent
+13.92
+Found using Brent
+3.66
+Found using Brent
+1.77
+Found using Brent
+1.66
+Found using Brent
+3.32
+Found using Brent
+3.35
+Found using Brent
+3.49
+Found using Brent
+1.74
+Found using Brent
+6.81
+Found using Brent
+6.51
+Found using Brent
+3.28
+Found using Brent
+3.48
+Found using Brent
+3.35
+Found using Brent
+13.54
+Found using Brent
+6.79
+Found using Brent
+3.32
+Found using Brent
+0.44
+Found using Brent
+6.41
+Found using Brent
+13.69
+Found using Brent
+6.78
+Found using Brent
+3.42
+Found using Brent
+3.39
+Found using Brent
+3.33
+Found using Brent
+3.35
+Found using Brent
+15.56
+Found using Brent
+0.81
+Found using Brent
+1.64
+Found using Brent
+13.31
+Found using Brent
+9.83
+Found using Brent
+6.82
+Found using Brent
+6.71
+Found using Brent
+6.61
+Found using Brent
+1.67
+Found using Brent
+6.65
+Found using Brent
+3.31
+Found using Brent
+3.26
+Found using Brent
+1.70
+Found using Brent
+3.32
+Timeout at 48646886797490143831161179413
+Found using Brent
+6.66
+Found using Brent
+18.28
+Found using Brent
+6.81
+Found using Brent
+6.64
+Found using Brent
+10.29
+Timeout at 14556806665994768958587535637
+Found using Brent
+1.73
+Found using Brent
+6.65
+Found using Brent
+3.29
+Found using Brent
+15.96
+Found using Brent
+3.38
+Found using Brent
+1.67
+Found using Brent
+13.06
+Found using Brent
+6.51
+Found using Brent
+3.46
+Found using Brent
+3.42
+Found using Brent
+11.74
+Found using Brent
+14.46
+Found using Brent
+13.55
+Found using Brent
+6.71
+Found using Brent
+6.68
+Found using Brent
+6.49
+Found using Brent
+7.92
+Found using Brent
+6.54

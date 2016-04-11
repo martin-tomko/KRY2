@@ -16,9 +16,21 @@ void factor(mpz_t& P, mpz_t& N) {
     return;
   }
 
-  // Attempt to find a factor using Pollard p-1 factorization:
+  // Attempt to find a factor using Brent factorization:
+  if (brent_factorization(P, N)) {
+    std::cerr << "Found using Brent" << std::endl;
+    return;
+  }
+
+  // Attempt to find a factor using Lenstra EC factorization:
   if (lenstra_ec_factorization(P, N)) {
     std::cerr << "Found using Lenstra EC factorization" << std::endl;
+    return;
+  }
+
+  // Attempt to find a factor using Brent factorization:
+  if (brent_factorization(P, N)) {
+    std::cerr << "Found using Brent" << std::endl;
     return;
   }
 
@@ -256,69 +268,173 @@ bool pollard_p_1_factorization(mpz_t& P, mpz_t& N) {
 //  */
 }
 
+
+bool brent_factorization(mpz_t& P, mpz_t& N) {
+  Randomizer rnd;
+
+  GMPNum gmp[11];
+  mpz_t &Y   = gmp[0],
+        &C   = gmp[1],
+        &M   = gmp[2],
+        &R   = gmp[3],
+        &Q   = gmp[4],
+        &K   = gmp[5],
+        &X   = gmp[6],
+        &YY  = gmp[7],
+        &I   = gmp[8],
+        &LIM = gmp[9],
+        &tmp = gmp[10];
+
+  if (mpz_divisible_2exp_p(N, 1)) { // if 2|N:
+    mpz_set_ui(P, 2);
+    return true;
+  }
+
+  rnd.get_random(Y, 1, N);
+  rnd.get_random(C, 1, N);
+  rnd.get_random(M, 1, N);
+  mpz_set_ui(P, 1);
+  mpz_set_ui(R, 1);
+  mpz_set_ui(Q, 1);
+
+  while(mpz_cmp_ui(P, 1) == 0) {
+    mpz_set(X, Y);
+    // for I in [0, R):
+    mpz_set_ui(I, 0);
+    while (mpz_cmp(I, R) < 0) {
+      // Y = Y^2 + C mod N:
+      mpz_mul(Y, Y, Y);
+      mpz_add(Y, Y, C);
+      mpz_mod(Y, Y, N);
+    }
+    mpz_set_ui(K, 0);
+    while ((mpz_cmp(K, R) < 0) && (mpz_cmp_ui(P, 1) == 0)) {
+      mpz_set(YY, Y);
+      // for I in [0, min(M, R-K)):
+      mpz_set_ui(I, 0);
+      mpz_sub(LIM, R, K);
+      if (mpz_cmp(M, LIM) < 0) { mpz_set(LIM, M); } // LIM = min(M, R-K)
+      while (mpz_cmp(I, LIM) < 0) {
+        // Y = Y^2 + C mod N:
+        mpz_mul(Y, Y, Y);
+        mpz_add(Y, Y, C);
+        mpz_mod(Y, Y, N);
+        // Q *= |X-Y| mod N:
+        mpz_sub(tmp, X, Y);
+        mpz_abs(tmp, tmp);
+        mpz_mul(Q, Q, tmp);
+        mpz_mod(Q, Q, N);
+      }
+      gcd(P, Q, N);
+      mpz_add(K, K, M);
+    }
+    mpz_mul_2exp(R, R, 1); // R *= 2
+  }
+  if (mpz_cmp(P, N) == 0) {
+    do {
+      // YY = YY^2 + C mod N:
+      mpz_mul(YY, YY, YY);
+      mpz_add(YY, YY, C);
+      mpz_mod(YY, YY, N);
+
+      // tmp = |X-YY|:
+      mpz_sub(tmp, X, YY);
+      mpz_abs(tmp, tmp);
+
+      gcd(P, tmp, N);
+    } while (mpz_cmp_ui(P, 1) <= 0);
+  }
+
+  return true;
+}
+
+
+bool brent_factorization_old(mpz_t& P, mpz_t& N) {
+
+  GMPNum gmp[3];
+  mpz_t &xi = gmp[0],
+        &xm = gmp[1],
+        &df = gmp[2]; 
+
+  mpz_set_ui(xi, 2);
+  mpz_set(xm, xi);
+  unsigned long i = 1;
+
+  if (mpz_divisible_2exp_p(N, 1)) { // if 2|N:
+    mpz_set_ui(P, 2);
+    return true;
+  }
+
+  while(true) {
+    // TODO: co ak je prvocislo?
+    mpz_mul(xi, xi, xi);
+    mpz_add_ui(xi, xi, 1);
+    mpz_mod(xi, xi, N);
+    mpz_sub(df, xi, xm);
+
+    gcd(P, df, N);
+    if ((mpz_cmp_ui(P, 1) != 0) && (mpz_cmp(P, N) != 0)) {
+      return true;
+    }
+
+    if (is2pow(i)) {
+      mpz_set(xm, xi);
+    }
+    i++;
+  }
+
+  return false;
+}
+
+
+
 bool lenstra_ec_factorization(mpz_t& P, mpz_t& N) {
   /* It is assumed that N was already analyzed with a simpler method
    * and is not divisible by 2 or 3. */
 
-  // 1. TODO: check whether m^r = n for some r?
-  unsigned long K = 1000000;
-  unsigned attempts = 0;
+  unsigned long B1 = B0;
+  unsigned trial_cnt = 0;
 
-  GMPNum gmp[1];
-  mpz_t &k = gmp[0];
+  //GMPNum gmp[1];
+  //mpz_t &k = gmp[0];
 
-  mpz_set_ui(k, TRIAL_LIMIT);
-  if (is_m_to_r(P, N, k)) {
+  // 0. Initial checks:
+
+  // It is assumed that N is not divisible by 2 or 3.
+  // Is n a perfect power of some integer?
+  if (is_m_to_r(P, N, TRIAL_LIMIT)) {
     return true;
-  }
+  }
 
-  lcm_cum(k, K, N);
-  mpz_mod(k, k, N);
-
-  std::cout << "Lenstra is happening." << std::endl;
+  //std::cout << "Lenstra is happening." << std::endl;
   while (true) {
-    ECPoint E;
-    // Pick curve:
-    if (!pick_curve(E, P, N)) {
-      std::cout << "We are done, somehow" << std::endl;
 
+    // 1. Pick a curve:
+
+    ECPoint E;
+    if (!pick_curve(E, P, N)) {
       // A factor was found and written to P.
       return true;
     }
 
-  
-/*
-    // Print point:
-    std::cout << "Observe the point:" <<  std::endl;
-    print_hex_mpz(E.get_x());
-    std::cout << std::endl;
-    print_hex_mpz(E.get_y());
-    std::cout << std::endl;
-    print_hex_mpz(E.get_a());
-    std::cout << std::endl;
-*/
-
-
-    if (! E.pow(P, k)) { // Addition failed.
-      if (mpz_cmp(P, N) == 0) {
-        K /= 2;
-        break;
-      } else { // A factor was found:
-        return true;
-      }
+    // 2. Phase one - attempt to multiply E by small primes:
+    if (ecm_phase_one(P, E, B1)) {
+      return true;
     }
 
-    if (E.is_inf()) {
-      continue;
+
+    // 3. Phase two - 
+    if (ecm_phase_two(P, E, B1)) {
+      return true;
     }
 
-    attempts++;
-    if ((attempts & 255) == 255) {
-      std::cout << "Increasing K from " << K << std::endl;
-      K *= 2;
-      lcm_cum(k, K, N);
-      mpz_mod(k, k, N);
-    }
+    trial_cnt += 1;
+    B1 *= Q_TRIAL;                // increase B1
+
+    //if ((trial_cnt & 255) == 255) {
+      std::cerr << "Trial #" << trial_cnt << " finished, "
+                << "new B1 = " << B1 << std::endl;
+   // }
   }
 
   return false;
@@ -362,7 +478,7 @@ void lcm_cum(mpz_t& lcm, unsigned long K, mpz_t& N) {
       while (m < K) {
         m *= p;
       }
-  //    m /= p;
+      m /= p;
 
       mpz_mul_ui(lcm, lcm, m);
       if ((p & 255) == 255) {
@@ -372,18 +488,22 @@ void lcm_cum(mpz_t& lcm, unsigned long K, mpz_t& N) {
   }
 }
 
-bool is_m_to_r(mpz_t& m, mpz_t& n, mpz_t& limit) {
+bool is_m_to_r(mpz_t& m, mpz_t& n, unsigned long limit) {
   /* Check whether n = m^r for integers m, r such that m >= limit.
    *  */
   GMPNum gmp;
   mpz_t& mr = gmp;
 
-  return mpz_perfect_power_p(n);
+  /* GMP has a function for this, which is however not very useful, as it
+   * doesn't provide the root:
+   *
+   *   return mpz_perfect_power_p(n);
+   * */
 
   unsigned long r = 2;
   mpz_root(m, n, r);
-  while (mpz_cmp(m, limit) >= 0) {  // while m >= limit:
-    mpz_pow_ui(mr, m, r)            // mr = m^r
+  while (mpz_cmp_ui(m, limit) >= 0) {  // while m >= limit:
+    mpz_pow_ui(mr, m, r);           // mr = m^r
     if (mpz_cmp(mr, n) == 0) {      // mr == n  -->  n == m^r:
       return true;
     }
@@ -391,4 +511,144 @@ bool is_m_to_r(mpz_t& m, mpz_t& n, mpz_t& limit) {
     mpz_root(m, n, r);
   }
   return false;
+}
+
+bool ecm_try_mult(mpz_t& remainder, ECPoint& E, unsigned long K) {
+  Sieve& is_prime = Sieve::get_instance(K);
+
+  unsigned m;
+
+  for (unsigned p = 2; p < K; p++) {
+    if (is_prime[p]) {
+      m = p;
+      while (m < K) {
+        m *= p;
+      }
+      m /= p;
+
+      if (! E.pow(remainder, m)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool ecm_phase_one(mpz_t& divisor, ECPoint& E, unsigned long B1) {
+  Sieve& is_prime = Sieve::get_instance(B1);
+
+  unsigned long m;
+
+  for (unsigned long p = 2; p < B1; p++) {
+    if (!is_prime[p]) {
+      continue;
+    }
+
+    m = p;
+    while (m < B1) { m *= p; }
+    m /= p;
+
+    if (!E.pow(divisor, m)) {
+      return true;
+    }
+
+    if (E.is_inf()) {
+      break;
+    }
+  }
+
+  return false;
+}
+
+bool ecm_phase_two(mpz_t& divisor, ECPoint& E, unsigned long B1) {
+  Randomizer rnd;
+
+  unsigned long B2 = B1 * PHASE2_MULTIPLIER;
+  unsigned e = choose_e(B1); // 1 <= e <= 60
+
+  unsigned t = 5;
+  while (static_cast<unsigned>((1 << t) - 1) <= (50*e)) {
+    // 2^t - 1 <= 50*e:
+    t++;
+  }
+  t--;
+
+  unsigned r = (1 << t) - 1;
+  unsigned rr = B2/r;
+
+  std::vector<GMPNum> xi { r };
+
+  GMPNum gmp[7];
+  mpz_t &lim  = gmp[0],
+        &tmp  = gmp[1],
+        &prod = gmp[2],
+        &X    = gmp[3],
+        &tmp2 = gmp[4];
+
+  ECPoint Q;
+
+  mpz_set_ui(lim, (1<<30) / (e+2));
+  unsigned long ui, vi, uj, vj;
+
+  rnd.get_random(tmp, 1, lim);
+  ui = mpz_get_ui(tmp);
+  rnd.get_random(tmp, 1, lim);
+  vi = mpz_get_ui(tmp);
+  rnd.get_random(tmp, 1, lim);
+  uj = mpz_get_ui(tmp);
+  rnd.get_random(tmp, 1, lim);
+  vj = mpz_get_ui(tmp);
+
+  // compute polynomial:
+  for (unsigned i = 0; i < r; i++) {
+    mpz_set_ui(tmp, ui*i + vi);
+    mpz_powm_ui(tmp, tmp, e, E.get_n());
+    Q = E;
+    if (!Q.pow(divisor, tmp)) {
+      return true;
+    }
+    mpz_set(xi[i], Q.get_x());
+  }
+
+  // evaluate product:
+  mpz_set_ui(prod, 1);
+  for (unsigned j = 0; j < rr; j++) {
+    mpz_set_ui(tmp, uj*j + vj);
+    mpz_powm_ui(tmp, tmp, e, E.get_n());
+    Q = E;
+    if (!Q.pow(divisor, tmp)) {
+      return true;
+    }
+
+    //evaluate polynomial for j:
+    mpz_set(X, Q.get_x());
+    mpz_set_ui(tmp, 1);
+    for (unsigned i = 0; i < r; i++) {
+      mpz_sub(tmp2, X, xi[i]);
+      mpz_mul(tmp, tmp, tmp2);
+    }
+    mpz_mul(prod, prod, tmp);
+  }
+
+  gcd(divisor, prod, E.get_n());
+
+  if ((mpz_cmp_ui(divisor, 1) != 0)
+   && (mpz_cmp(divisor, E.get_n()) != 0)) {
+    return true;
+  }
+
+  return false;
+}
+
+unsigned choose_e(unsigned long B1) {
+  unsigned e = 1;
+  unsigned i = 0;
+  B1 /= 1250;
+
+  while((e = E_SELECTION[++i]) != 0) {
+    if ((e * e) > B1) {
+      return E_SELECTION[i-1];
+    }
+  }
+  return (e > 0 ? e : 1);
 }
