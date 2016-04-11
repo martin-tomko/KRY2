@@ -1,4 +1,7 @@
 *.o
 MEASUREMENTS/
+MEASUREMENTS_*
+*.tar.gz
+kry-*
 .*.swp
 kry

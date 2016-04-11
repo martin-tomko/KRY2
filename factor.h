@@ -28,6 +28,13 @@ bool brent_factorization(mpz_t&, mpz_t&);
 
 inline bool is2pow(unsigned long i) { return (i & (i-1)) == 0; }
 
+inline void apply_f(mpz_t& Y, mpz_t& C, mpz_t& N, mpz_t& tmp)
+  /* Y := Y^2 + C mod N*/
+  { mpz_set(tmp, C); mpz_addmul(tmp, Y, Y); mpz_mod(Y, tmp, N); }
+  //{ mpz_mul(Y, Y, Y); mpz_add(Y, Y, C); mpz_mod(Y, Y, N); }
+
+
+
 bool lenstra_ec_factorization(mpz_t&, mpz_t&);
 bool pick_curve(ECPoint&, mpz_t&, mpz_t&);
   // Cummulative least common multiple - of integers up to K

@@ -290,9 +290,36 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
     return true;
   }
 
+
+
   rnd.get_random(Y, 1, N);
   rnd.get_random(C, 1, N);
   rnd.get_random(M, 1, N);
+
+  std::cerr << "N: ";
+  mpz_out_str(stderr, 10, N);
+  std::cerr << std::endl; 
+
+  std::cerr << "Y: ";
+  mpz_out_str(stderr, 10, Y);
+  std::cerr << std::endl; 
+
+  std::cerr << "C: ";
+  mpz_out_str(stderr, 10, C);
+  std::cerr << std::endl; 
+
+  std::cerr << "M: ";
+  mpz_out_str(stderr, 10, M);
+  std::cerr << std::endl; 
+
+
+/*
+  mpz_set_ui(Y, 2);
+  mpz_set_ui(C, 1);
+//  mpz_set_ui(M, 2);
+  rnd.get_random(M, 1, N);
+*/
+
   mpz_set_ui(P, 1);
   mpz_set_ui(R, 1);
   mpz_set_ui(Q, 1);
@@ -303,9 +330,7 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
     mpz_set_ui(I, 0);
     while (mpz_cmp(I, R) < 0) {
                                      // Y = Y^2 + C mod N:
-      mpz_mul(Y, Y, Y);
-      mpz_add(Y, Y, C);
-      mpz_mod(Y, Y, N);
+      apply_f(Y, C, N, tmp);
 
       mpz_add_ui(I, I, 1);
     }
@@ -321,9 +346,7 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
 
       while (mpz_cmp(I, LIM) < 0) {
                                        // Y = Y^2 + C mod N:
-        mpz_mul(Y, Y, Y);
-        mpz_add(Y, Y, C);
-        mpz_mod(Y, Y, N);
+        apply_f(Y, C, N, tmp);
                                        // Q *= |X-Y| mod N:
         mpz_sub(tmp, X, Y);
         mpz_abs(tmp, tmp);
@@ -342,19 +365,22 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
   mpz_out_str(stderr, 10, R);
   std::cerr << std::endl; 
 
+  unsigned cnt = 0;
   if (mpz_cmp(P, N) == 0) {      // if P == N:
+    std::cerr << "Running extra loop:\n";
     do {                           // repeat:
                                      // YY = YY^2 + C mod N:
-      mpz_mul(YY, YY, YY);
-      mpz_add(YY, YY, C);
-      mpz_mod(YY, YY, N);
+      apply_f(YY, C, N, tmp);
 
                                      // tmp = |X-YY|:
       mpz_sub(tmp, X, YY);
       mpz_abs(tmp, tmp);
                                      // P = gcd(|X-YY|, N)
       gcd(P, tmp, N);
+      cnt++;
     } while (mpz_cmp_ui(P, 1) <= 0); // until P > 1
+    std::cerr << "Successfully finished extra loop after " << cnt
+              << " iterations.\n";
   }
 
   return true;

@@ -14,9 +14,9 @@ verify_cmd="./verify_factor.py"
 cp $prog $prog_temp
 
 for num in `$cmd`; do
-#  timeout $time_limit $time_cmd $prog_temp -b $num || echo "Timeout at $num" >&2
-  result=`$prog_temp -b $num`
-  $verify_cmd $num $result || echo "Bad: $num $result" >&2
+  timeout $time_limit $time_cmd $prog_temp -b $num || echo "Timeout at $num" >&2
+  #result=`$prog_temp -b $num`
+  #$verify_cmd $num $result || echo "Bad: $num $result" >&2
 done
 
 rm $prog_temp
