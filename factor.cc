@@ -269,6 +269,7 @@ bool pollard_p_1_factorization(mpz_t& P, mpz_t& N) {
 }
 
 
+
 bool brent_factorization(mpz_t& P, mpz_t& N) {
   Randomizer rnd;
 
