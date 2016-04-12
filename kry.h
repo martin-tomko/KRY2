@@ -1,4 +1,4 @@
-/*
+/* KRY2
  * */
 
 #ifndef __KRY_H_
