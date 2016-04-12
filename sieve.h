@@ -1,4 +1,4 @@
-/*
+/* sieve
  * */
 
 #ifndef __SIEVE_H
