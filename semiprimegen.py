@@ -197,8 +197,8 @@ import random
 semiprimes = set([p*q for p in FIFTEEN_DIGIT for q in FIFTEEN_DIGIT])
 #semiprimes = set([p*q for p in TEN_DIGIT for q in TWENTY_DIGIT])
 
-#suitable = [n for n in semiprimes if 96 <= lg(n) < 97]
-suitable = [n for n in semiprimes if lg(n) < 97]
+suitable = [n for n in semiprimes if 96 <= lg(n) < 97]
+#suitable = [n for n in semiprimes if lg(n) < 97]
 
 
 #print (format(max(suitable), "02x"))
@@ -208,7 +208,7 @@ suitable = [n for n in semiprimes if lg(n) < 97]
 random.shuffle(suitable)
 
 #for n in suitable:
-for n in suitable[:10]:
+for n in suitable[:30]:
 #for n in sorted(suitable)[-10:]:
     #pass
     print("0x{:02x}".format(n))

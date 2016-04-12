@@ -273,29 +273,63 @@ bool pollard_p_1_factorization(mpz_t& P, mpz_t& N) {
 bool brent_factorization(mpz_t& P, mpz_t& N) {
   Randomizer rnd;
 
-  GMPNum gmp[11];
-  mpz_t &Y   = gmp[0],
-        &C   = gmp[1],
-        &M   = gmp[2],
-        &R   = gmp[3],
-        &Q   = gmp[4],
-        &K   = gmp[5],
-        &X   = gmp[6],
-        &YY  = gmp[7],
-        &I   = gmp[8],
-        &LIM = gmp[9],
-        &tmp = gmp[10];
+  GMPNum gmp[3];
+  mpz_t &C   = gmp[0],
+        &X   = gmp[1],
+        &YY  = gmp[2];
 
   if (mpz_divisible_2exp_p(N, 1)) { // if 2|N:
     mpz_set_ui(P, 2);
     return true;
   }
 
+  unsigned long r_limit_very_low = 1 << 20;
+
+  //brent_body_unlimited(P, YY, X, C, rnd, N);
+  unsigned body_cnt = 0,
+           low_body_limit = 3,
+           increasing_limit = 5;
+
+  unsigned long r_limit = r_limit_very_low;
+ 
+  do {
+    if (body_cnt < low_body_limit) {
+      brent_body_limited(P, YY, X, C, rnd, N, r_limit);
+    } else if (body_cnt < increasing_limit) {
+      r_limit <<= 1;
+      brent_body_limited(P, YY, X, C, rnd, N, r_limit);
+    } else {
+      brent_body_unlimited(P, YY, X, C, rnd, N);
+    }
+    body_cnt++;
+  } while (mpz_cmp_ui(P, 1) == 0);
+  brent_tail(P, YY, X, C, N);
+
+  return true;
+}
 
 
-  rnd.get_random(Y, 1, N);
+void brent_body_unlimited(mpz_t& P, mpz_t& YY, mpz_t& X, mpz_t& C,
+                          Randomizer& rnd, mpz_t& N) {
+
+  GMPNum gmp[8];
+  mpz_t &Y   = gmp[0],
+        &R   = gmp[1],
+        &Q   = gmp[2],
+        &K   = gmp[3],
+        &I   = gmp[4],
+        &M   = gmp[5],
+        &LIM = gmp[6],
+        &tmp = gmp[7]; 
+
+
   rnd.get_random(C, 1, N);
+  rnd.get_random(Y, 1, N);
   rnd.get_random(M, 1, N);
+
+  //mpz_set_str(Y, "2689549212813007823775014696", 10);
+  //mpz_set_str(C, "50838701228462599750134164988", 10);
+  //mpz_set_str(M, "4353572276296302780186468685", 10);
 
   std::cerr << "N: ";
   mpz_out_str(stderr, 10, N);
@@ -331,12 +365,12 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
     mpz_set_ui(I, 0);
     while (mpz_cmp(I, R) < 0) {
                                      // Y = Y^2 + C mod N:
-      apply_f(Y, C, N, tmp);
+      apply_f(Y, C, N);
 
       mpz_add_ui(I, I, 1);
     }
     mpz_set_ui(K, 0);              // K = 0
-                                   // while K < R and G == 1:
+                                   // while K < R and P == 1:
     while ((mpz_cmp(K, R) < 0) && (mpz_cmp_ui(P, 1) == 0)) {
       mpz_set(YY, Y);                // YY = Y
                                      // for I in [0, min(M, R-K)):
@@ -347,7 +381,7 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
 
       while (mpz_cmp(I, LIM) < 0) {
                                        // Y = Y^2 + C mod N:
-        apply_f(Y, C, N, tmp);
+        apply_f(Y, C, N);
                                        // Q *= |X-Y| mod N:
         mpz_sub(tmp, X, Y);
         mpz_abs(tmp, tmp);
@@ -366,12 +400,114 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
   mpz_out_str(stderr, 10, R);
   std::cerr << std::endl; 
 
+}
+
+void brent_body_limited(mpz_t& P, mpz_t& YY, mpz_t& X, mpz_t& C,
+                          Randomizer& rnd, mpz_t& N, unsigned long r_limit) {
+
+  /* Cycles are limited */
+
+  unsigned long r = 1,
+                m;
+
+  GMPNum gmp[4];
+  mpz_t &Y   = gmp[0],
+        &Q   = gmp[1],
+        &M   = gmp[2],
+        &tmp = gmp[3]; 
+
+
+  rnd.get_random(C, 1, N);
+  rnd.get_random(Y, 1, N);
+  rnd.get_random(M, 1, N);
+
+  //mpz_set_str(Y, "2689549212813007823775014696", 10);
+  //mpz_set_str(C, "50838701228462599750134164988", 10);
+  //mpz_set_str(M, "4353572276296302780186468685", 10);
+
+  m = (mpz_cmp_ui(M, r_limit) < 0)
+    ? mpz_get_ui(M)
+    : r_limit;
+
+
+  std::cerr << "N: ";
+  mpz_out_str(stderr, 10, N);
+  std::cerr << std::endl; 
+
+  std::cerr << "Y: ";
+  mpz_out_str(stderr, 10, Y);
+  std::cerr << std::endl; 
+
+  std::cerr << "C: ";
+  mpz_out_str(stderr, 10, C);
+  std::cerr << std::endl; 
+
+  std::cerr << "M: ";
+  mpz_out_str(stderr, 10, M);
+  std::cerr << std::endl; 
+
+
+/*
+  mpz_set_ui(Y, 2);
+  mpz_set_ui(C, 1);
+//  mpz_set_ui(M, 2);
+  rnd.get_random(M, 1, N);
+*/
+
+  mpz_set_ui(P, 1);
+  mpz_set_ui(Q, 1);
+
+
+  while ((mpz_cmp_ui(P, 1) == 0) && r < r_limit) { // while P == 1:
+    mpz_set(X, Y);                 // X = Y
+                                   // for I in [0, R):
+    for (unsigned long i = 0; i < r; i++) {
+                                     // Y = Y^2 + C mod N:
+      apply_f(Y, C, N);
+    }
+
+                                   // while K < R and P == 1:
+    unsigned long k = 0;
+    unsigned long lim;
+    while ((k < r) && (mpz_cmp_ui(P, 1) == 0)) {
+      mpz_set(YY, Y);                // YY = Y
+                                     // for I in [0, min(M, R-K)):
+
+      // LIM = min(M, R-K):
+      lim = r-k;
+      if (mpz_cmp_ui(M, lim) < 0) { lim = mpz_get_ui(M); }
+
+      for (unsigned long i = 0; i < lim; i++) {
+                                       // Y = Y^2 + C mod N:
+        apply_f(Y, C, N);
+                                       // Q *= |X-Y| mod N:
+        mpz_sub(tmp, X, Y);
+        mpz_abs(tmp, tmp);
+        mpz_mul(Q, Q, tmp);
+        mpz_mod(Q, Q, N);
+      }
+      gcd(P, Q, N);                  // P = gcd(Q, N)
+      k += m;
+    }
+
+    r *= 2;
+  }
+
+  std::cerr << "r: " << r << std::endl; 
+
+}
+
+
+void brent_tail(mpz_t& P, mpz_t& YY, mpz_t& X, mpz_t& C, mpz_t& N) {
+  GMPNum gmp;
+  mpz_t& tmp = gmp;
+
   unsigned cnt = 0;
   if (mpz_cmp(P, N) == 0) {      // if P == N:
     std::cerr << "Running extra loop:\n";
     do {                           // repeat:
                                      // YY = YY^2 + C mod N:
-      apply_f(YY, C, N, tmp);
+      apply_f(YY, C, N);
 
                                      // tmp = |X-YY|:
       mpz_sub(tmp, X, YY);
@@ -379,13 +515,12 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
                                      // P = gcd(|X-YY|, N)
       gcd(P, tmp, N);
       cnt++;
-    } while (mpz_cmp_ui(P, 1) <= 0); // until P > 1
+    } while (mpz_cmp_ui(P, 1) <= 0); // until P > 1
     std::cerr << "Successfully finished extra loop after " << cnt
               << " iterations.\n";
   }
-
-  return true;
 }
+
 
 
 bool brent_factorization_old(mpz_t& P, mpz_t& N) {
