@@ -1,4 +1,4 @@
-/*
+/* factor
  * */
 
 #ifndef __FACTOR_H_
