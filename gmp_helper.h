@@ -20,6 +20,7 @@ class GMPNum {
 };
 
 class Randomizer {
+  /* Should NOT be used to generate keys! */
  public:
   Randomizer() { gmp_randinit_mt(state); seed(); } // Mersenne Twister
   ~Randomizer() { gmp_randclear(state); }
@@ -35,4 +36,11 @@ class Randomizer {
 void gcd(mpz_t&, mpz_t&, mpz_t&);
 bool invert(mpz_t&, mpz_t&, mpz_t&);
 
+/*
+class SecureRandomizer {
+ public:
+  
+ private:
+};
+*/
 #endif

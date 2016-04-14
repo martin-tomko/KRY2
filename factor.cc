@@ -283,13 +283,14 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
     return true;
   }
 
-  unsigned long r_limit_very_low = 1 << 20;
 
-  //brent_body_unlimited(P, YY, X, C, rnd, N);
+  brent_body_unlimited(P, YY, X, C, rnd, N);
+/*
   unsigned body_cnt = 0,
            low_body_limit = 3,
            increasing_limit = 5;
 
+  unsigned long r_limit_very_low = 1 << 20;
   unsigned long r_limit = r_limit_very_low;
  
   do {
@@ -303,6 +304,7 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
     }
     body_cnt++;
   } while (mpz_cmp_ui(P, 1) == 0);
+*/
   brent_tail(P, YY, X, C, N);
 
   return true;
@@ -328,7 +330,7 @@ void brent_body_unlimited(mpz_t& P, mpz_t& YY, mpz_t& X, mpz_t& C,
   rnd.get_random(M, 1, N);
 
   //mpz_set_str(Y, "2689549212813007823775014696", 10);
-  //mpz_set_str(C, "50838701228462599750134164988", 10);
+  mpz_set_str(C, "32767", 10);
   //mpz_set_str(M, "4353572276296302780186468685", 10);
 
   std::cerr << "N: ";
