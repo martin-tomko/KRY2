@@ -30,9 +30,11 @@ void Randomizer::seed() {
 }
 
 void Randomizer::get_random(mpz_t& n, unsigned long min_val, mpz_t& max_val) {
-  mpz_sub_ui(n, max_val, min_val);
-  mpz_urandomm(n, state, n);
-  mpz_add_ui(n, n, min_val);
+  // Generate an integer in [min_val, max_val)
+
+  mpz_sub_ui(n, max_val, min_val); // n = max_val - min_val
+  mpz_urandomm(n, state, n);       // 0 <= n < max_val - min_val
+  mpz_add_ui(n, n, min_val);       // min_val <= n < max_val
 }
 
 void gcd(mpz_t& A, mpz_t& M, mpz_t& N) {

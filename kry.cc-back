@@ -9,7 +9,6 @@
 #include <sstream>
 
 #include "factor.h"
-#include "primes.h"
 
 //#include "sieve.h"
 #include "elliptic_curves.h"
@@ -44,22 +43,22 @@ int main(int argc, char** argv) {
 
   try {
     switch(par.mode) {
-      case Mode::GENERATE: { // generate RSA key:
+      case Mode::GENERATE: // generate RSA key:
 
         cerr << "Warning!! Just a test!! Not actually generating anything!"
              << endl;
         // TODO: this is a temporary test, the actual parameter will have
         // very different semantics!!!
-        mpz_t& N = par.val[0];
+        mpz_t& N = par.val[0]
 
-        if (is_probably_prime(N)) {
-          cout << "Prime." << endl;
+        if (is_prime(N)) {
+          cout << "Prime." << endl;
         } else {
-          cout << "Not prime." << endl;
+          cout << "Not prime." << endl;
         }
 
         //throw runtime_error("GENERATE not yet implemented!");
-      } break;
+        break;
 
       case Mode::ENCRYPT: { // Encrypt message:
         GMPNum gmp_C;

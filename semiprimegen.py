@@ -208,7 +208,7 @@ suitable = [n for n in semiprimes if 96 <= lg(n) < 97]
 random.shuffle(suitable)
 
 #for n in suitable:
-for n in suitable[:30]:
+for n in suitable[:200]:
 #for n in sorted(suitable)[-10:]:
     #pass
     print("0x{:02x}".format(n))

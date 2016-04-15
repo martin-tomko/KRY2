@@ -8,7 +8,7 @@ prog_temp=$prog-$(date +%H%M%S)
 
 cmd=$gen
 time_cmd="/usr/bin/time -f %U"
-time_limit=30
+time_limit=60
 verify_cmd="./verify_factor.py"
 
 cp $prog $prog_temp

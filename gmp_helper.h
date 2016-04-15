@@ -27,6 +27,7 @@ class Randomizer {
   void seed();
   operator gmp_randstate_t&() { return state; }
 
+  // Generate an integer in [min_val, max_val)
   void get_random(mpz_t&, unsigned long, mpz_t&);
  private:
   gmp_randstate_t state;

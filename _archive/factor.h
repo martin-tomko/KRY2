@@ -21,6 +21,11 @@ const unsigned E_SELECTION[] = {1, 2, 3, 6, 12, 18, 24, 30, 60, 0};
 void factor(mpz_t&, mpz_t&);
 
 bool trial_division(mpz_t&, mpz_t&);
+bool fermat_factorization(mpz_t&, mpz_t&);
+bool pollard_rho_factorization(mpz_t&, mpz_t&);
+bool pollard_p_1_factorization(mpz_t&, mpz_t&);
+
+
 bool brent_factorization(mpz_t&, mpz_t&);
 
 inline bool is2pow(unsigned long i) { return (i & (i-1)) == 0; }

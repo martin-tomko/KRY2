@@ -16,6 +16,12 @@ void factor(mpz_t& P, mpz_t& N) {
     return;
   }
 
+  // Attempt to find a factor using trial division:
+  if (trial_division(P, N)) { 
+    std::cerr << "Found using Trial division" << std::endl;
+    return;
+  }
+
   // Attempt to find a factor using Brent factorization:
   if (brent_factorization(P, N)) {
     std::cerr << "Found using Brent" << std::endl;
@@ -31,30 +37,6 @@ void factor(mpz_t& P, mpz_t& N) {
   // Attempt to find a factor using Brent factorization:
   if (brent_factorization(P, N)) {
     std::cerr << "Found using Brent" << std::endl;
-    return;
-  }
-
-  // Attempt to find a factor using trial division:
-  if (trial_division(P, N)) { 
-    std::cerr << "Found using Trial division" << std::endl;
-    return;
-  }
-
-  // Attempt to find a factor using Pollard p-1 factorization:
-  if (pollard_p_1_factorization(P, N)) {
-    std::cerr << "Found using Pollard p-1" << std::endl;
-    return;
-  }
-
-  // Attempt to find a factor using Fermat factorization:
-  if (fermat_factorization(P, N)) {
-    std::cerr << "Found using Fermat" << std::endl;
-    return;
-  }
-
-  // Attempt to find a factor using Pollard rho factorization:
-  if (pollard_rho_factorization(P, N)) {
-    std::cerr << "Found using Pollard rho" << std::endl;
     return;
   }
 
@@ -103,172 +85,6 @@ bool trial_division(mpz_t& P, mpz_t& N) {
   return false; // Trial division found no factors.
 }
 
-bool fermat_factorization(mpz_t& P, mpz_t& N) {
-  bool found = false;
-  GMPNum gmp[5];
-  
-  mpz_t &X  = gmp[0],
-        &XX = gmp[1],
-        &Y  = gmp[2],
-        &YY = gmp[3],
-        &R  = gmp[4];
-
-  mpz_sqrtrem(X, R, N);
-  if (mpz_cmp_ui(R, 0) != 0) {
-    mpz_add_ui(X, X, 1);
-  }
-  // X = ceil(sqrt(N))
-
-  for(; mpz_cmp(X, N) <= 0; mpz_add_ui(X, X, 1)) {
-//    if (mpz_divisible_ui_p(X, 1000)) {
-//      print_hex_mpz(X); std::cout << std::endl;
-//    }
-    mpz_mul(XX, X, X);
-    mpz_sub(YY, XX, N);          // YY = XX - N
-    mpz_sqrtrem(Y, R, YY);       // compute sqrt and reminder of YY
-    if (mpz_cmp_ui(R, 0) == 0) { // YY is square, a factor was found:
-      mpz_sub(P, X, Y);          // X - Y
-      found = true;
-      break;
-    }
-    mpz_add_ui(X, X, 1);         // X = X + 1
-  }
-
-  return found;
-}
-
-bool pollard_rho_factorization(mpz_t& P, mpz_t& N) {
-  /* Pollard's rho algorithm using the polynomial g(x) = x^2 + 1 */
-
-  GMPNum gmp[2];
-  mpz_t &X = gmp[0],
-        &Y = gmp[1];
-
-  mpz_set_ui(X, 2);
-  mpz_set_ui(Y, 2);
-  mpz_set_ui(P, 1);
-  while (mpz_cmp_ui(P, 1) == 0) {
-    // X = g(X):
-    mpz_mul(X, X, X);
-    mpz_add_ui(X, X, 1);
-
-    // Y = g(g(Y)):
-    mpz_mul(Y, Y, Y);
-    mpz_add_ui(Y, Y, 1);
-    mpz_mul(Y, Y, Y);
-    mpz_add_ui(Y, Y, 1);
-
-    // P = gcd(|X-Y|, n):
-    mpz_sub(P, X, Y);
-    mpz_abs(P, P);
-    gcd(P, P, N);
-  }
-
-  return (mpz_cmp(P, N) != 0); // return P == N ? false : true;
-}
-
-bool pollard_p_1_factorization(mpz_t& P, mpz_t& N) {
-
-  /*
-  Randomizer rnd;
-  size_t bound1 = 10000000; // = 10000000;
-//       bound2 = bound1 * bound1;
-  const bool_vec& is_prime = Sieve::get_vector(bound1);
-
-  size_t pexp;
-//  double logb;
-  GMPNum gmp[2];
-  mpz_t &m = gmp[0],
-        &a = gmp[1];
-
-  // choose a:
-  mpz_sub_ui(P, N, 2);     // P = N-2
-  mpz_urandomm(a, rnd, P); // 0 <= fct < N-2
-  mpz_add_ui(a, a, 2);     // 2 <= fct < N
-
-  while (true) {
-    Sieve::stretch(bound1);
-
-    // Compute m = lcm(1, ..., bound1):
-    mpz_set_ui(m, 1);
-    for (size_t p = 2; p < bound1; p++) { // for each prime:
-      if (!is_prime[p]) { // skip composite numbers
-        continue;
-      }
-
-      pexp = p;
-      while (p < bound1) {
-        pexp *= p;
-      }
-      pexp /= p;
-
-      mpz_mul_ui(m, m, pexp);
-    }
-
-    
-
-
-    gcd(P, a, N);
-    if (mpz_cmp_ui(P, 1) != 0) { // if gcd(a,n) != 1, we found a factor.
-      return true;
-    }
-
-    mpz_powm(a, a, m, N); // a = a^m mod N
-    mpz_sub_ui(a, a, 1);  // a = a - 1
-    gcd(P, a, N);
-
-    if (mpz_cmp_ui(P, 1) == 0) { // gcd == 1, increase bound and continue
-      bound1 *= 2;
-    } else if (mpz_cmp(P, N) == 0) { // gcd == N, change a
-      // choose a:
-      mpz_sub_ui(P, N, 2);     // P = N-2
-      mpz_urandomm(a, rnd, P); // 0 <= fct < N-2
-      mpz_add_ui(a, a, 2);     // 2 <= fct < N
-    } else { // otherwise, a factor has been found.
-      return true;
-    }
-
-  }
-  */
-
-//  /*
-  Randomizer rnd;
-
-  GMPNum gmp[2];
-  mpz_t &fct = gmp[0],
-        &k   = gmp[1];
-
-  // TODO: upper bound
-  // TODO: optimize
-  while(true) {
-    //mpz_set_ui(k, TRIAL_LIMIT);
-    mpz_set_ui(k, 2);
-
-    // choose A:
-/*
-    mpz_sub_ui(P, N, 2);     // P = N-2
-    mpz_urandomm(fct, rnd, P);    // 0 <= fct < N-2
-    mpz_add_ui(fct, fct, 2); // 2 <= fct < N
-*/
-    rnd.get_random(fct, 2, N);
-    mpz_set(P, fct);
-
-    while(mpz_cmp(P, N) != 0) {
-      mpz_powm(fct, fct, k, N);
-      mpz_sub_ui(P, fct, 1);
-      gcd(P, P, N);
-      if ((mpz_cmp_ui(P, 1) != 0) && (mpz_cmp(P, N) != 0)) {
-        return true;
-      }
-      mpz_add_ui(k, k, 1);
-    }
-  }
-
-  return false;
-//  */
-}
-
-
 
 bool brent_factorization(mpz_t& P, mpz_t& N) {
   Randomizer rnd;
@@ -284,7 +100,18 @@ bool brent_factorization(mpz_t& P, mpz_t& N) {
   }
 
 
-  brent_body_unlimited(P, YY, X, C, rnd, N);
+  unsigned round_limit = 1;
+  unsigned round_cnt = 0;
+  unsigned long r_limit = 1 << 30; // fairly high
+
+  do {
+    round_cnt++;
+    brent_body_limited(P, YY, X, C, rnd, N, r_limit);
+  } while ((round_cnt < round_limit)
+        && ((mpz_cmp_ui(P, 1) == 0) || (mpz_cmp(P, N) == 0)));
+  if (mpz_cmp_ui(P, 1) == 0) {
+    brent_body_unlimited(P, YY, X, C, rnd, N);
+  }
 /*
   unsigned body_cnt = 0,
            low_body_limit = 3,
@@ -330,8 +157,10 @@ void brent_body_unlimited(mpz_t& P, mpz_t& YY, mpz_t& X, mpz_t& C,
   rnd.get_random(M, 1, N);
 
   //mpz_set_str(Y, "2689549212813007823775014696", 10);
-  mpz_set_str(C, "32767", 10);
+  //mpz_set_str(C, "32767", 10);
   //mpz_set_str(M, "4353572276296302780186468685", 10);
+
+  std::cerr << "Running unlimited";
 
   std::cerr << "N: ";
   mpz_out_str(stderr, 10, N);
@@ -432,10 +261,11 @@ void brent_body_limited(mpz_t& P, mpz_t& YY, mpz_t& X, mpz_t& C,
     : r_limit;
 
 
+
   std::cerr << "N: ";
   mpz_out_str(stderr, 10, N);
   std::cerr << std::endl; 
-
+/*
   std::cerr << "Y: ";
   mpz_out_str(stderr, 10, Y);
   std::cerr << std::endl; 
@@ -447,7 +277,7 @@ void brent_body_limited(mpz_t& P, mpz_t& YY, mpz_t& X, mpz_t& C,
   std::cerr << "M: ";
   mpz_out_str(stderr, 10, M);
   std::cerr << std::endl; 
-
+*/
 
 /*
   mpz_set_ui(Y, 2);
